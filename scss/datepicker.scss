@@ -1,0 +1,162 @@
+// z-index
+$dp-dropDown-zIndex: 2;
+$dp-overlay-zIndex: 1;
+
+.c-date-picker {
+  margin-bottom: 8px;
+  font-family: 'PT Sans', sans-serif;
+  position: relative;
+
+  * {
+    box-sizing: border-box;
+  }
+
+  &__display {
+    padding: 10px 14px;
+    cursor: text;
+  }
+
+  &__drop-down {
+    border: 1px solid #bdbdbd;
+    width: 286px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .25);
+    position: absolute;
+    left: 0;
+    display: none;
+    z-index: $dp-dropDown-zIndex;
+  }
+
+  &__display:focus + &__drop-down {
+    display: block;
+  }
+
+  &--focused > &__drop-down {
+    display: block;
+  }
+
+  &--focused > &__overlay {
+    display: block;
+  }
+
+  &__year-wrapper {
+    padding: 10px;
+    justify-content: center;
+    display: flex;
+
+    span {
+      padding: 4px 10px;
+      align-self: center;
+      cursor: pointer;
+
+      &:hover {
+        background-color: whitesmoke;
+      }
+    }
+
+    input {
+      border: 1px solid #BDBDBD;
+      padding: 5px 10px;
+      width: 100px;
+      height: auto;
+      text-align: center;
+      background-color: #F2F2F2;
+      box-shadow: inset 0px 1px 4px rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  &__month-wrapper {
+    margin: 0;
+    padding: 5px 10px;
+    background-color: #364350;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  &__month {
+    margin: 5px 0;
+    border: 1px solid transparent;
+    width: calc(calc(100% / 6) - 5px);
+    text-align: center;
+    background-color: #93A0AE;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &.disabled {
+      background-color: #5C6772;
+      cursor: not-allowed;
+
+      &:focus,
+      &:hover {
+        border-color: transparent;
+      }
+    }
+
+    &.active {
+      background-color: white;
+    }
+    &.active:focus,
+    &.active.focus {
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+    }
+
+    &.focus,
+    &:focus,
+    &:hover {
+      border-color: #ffffff;
+    }
+  }
+
+  &__week-wrapper {
+    margin: 2px;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  &__date {
+    padding: 3px;
+    width: calc(100% / 7);
+    text-align: center;
+    border-radius: 2px;
+    cursor: pointer;
+
+    &.focus,
+    &:focus,
+    &:hover {
+      background-color: #ECF0F2;
+    }
+
+    &.empty,
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+
+      &:hover,
+      &:focus {
+        background-color: transparent;
+      }
+    }
+
+    &.empty {
+      cursor: default;
+    }
+
+    &.active {
+      background-color: #D4E7F1;
+    }
+  }
+
+  &__overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: $dp-overlay-zIndex;
+    display: none;
+  }
+}
