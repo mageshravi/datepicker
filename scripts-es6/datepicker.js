@@ -7,6 +7,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var EVENT_DATE_PICKER_YEAR_UPDATE = 'date-picker:year-update';
 var EVENT_DATE_PICKER_MONTH_UPDATE = 'date-picker:month-update';
 var EVENT_DATE_PICKER_FORCE_EDIT = 'date-picker:force-edit';
+var EVENT_DATE_PICKER_ENTER = 'date-picker:enter';
+var EVENT_DATE_PICKER_EXIT = 'date-picker:exit';
 
 /* eslint-env jquery */
 
@@ -25,13 +27,7 @@ var DatePicker = function () {
   function DatePicker($input) {
     _classCallCheck(this, DatePicker);
 
-    var today = new Date();
-    var tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-
-    this.defaults = {
-      value: tomorrow,
-      minDate: tomorrow
-    };
+    this.defaults = {};
 
     this.cssSelectors = {
       dp: '.c-date-picker',
@@ -56,21 +52,58 @@ var DatePicker = function () {
 
     this.$input = $input;
 
+    this.parseInputAttrs();
+
     this.setup();
 
     this.bindUIActions();
   }
 
   _createClass(DatePicker, [{
+    key: 'parseInputAttrs',
+    value: function parseInputAttrs() {
+      var minDateStr = this.$input.data('min-date');
+      var minDate = parseDateFromString(minDateStr);
+
+      if (!isNaN(minDate)) {
+        this.defaults.minDate = minDate;
+      }
+
+      var valueStr = this.$input.val();
+      var value = parseDateFromString(valueStr);
+
+      if (isNaN(value)) {
+        this.defaults.value = parseDateFromString('today');
+      } else {
+        this.defaults.value = value;
+      }
+
+      /**
+       * Parses date from the given string
+       * @param dateStr {String}
+       */
+      function parseDateFromString(dateStr) {
+        var today = new Date();
+        var tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+
+        switch (dateStr) {
+          case 'today':
+            return today;
+
+          case 'tomorrow':
+            return tomorrow;
+
+          default:
+            return new Date(dateStr);
+        }
+      }
+    }
+  }, {
     key: 'setup',
     value: function setup() {
       var dpClass = getClassNameFromSelector(this.cssSelectors.dp);
       var dpDisplayClass = getClassNameFromSelector(this.cssSelectors.dpDisplay);
       var dpDropDown = getClassNameFromSelector(this.cssSelectors.dpDropDown);
-
-      if (this.$input.val()) {
-        this.defaults.value = new Date(this.$input.val());
-      }
 
       // draw date-picker
       this.$dp = $('<div class="' + dpClass + '"></div>');
@@ -121,7 +154,20 @@ var DatePicker = function () {
         this.$dp.trigger(EVENT_DATE_PICKER_YEAR_UPDATE);
       }.bind(this));
 
-      this.$year.on('change', this.updateMonth.bind(this));
+      this.$year.on('keyup', function (ev) {
+        if (ev.keyCode !== 13) {
+          return;
+        }
+
+        this.updateMonth();
+        this.$dpMonthWrapper.focus();
+        this._navigateMonthsWithKeys();
+      }.bind(this));
+
+      this.$year.on('blur', function (ev) {
+        this.updateMonth();
+        this.$dpMonthWrapper.focus();
+      }.bind(this));
 
       this.$dp.on(EVENT_DATE_PICKER_YEAR_UPDATE, this.updateMonth.bind(this));
       this.$dp.on(EVENT_DATE_PICKER_MONTH_UPDATE, this.updateCal.bind(this));
@@ -134,17 +180,40 @@ var DatePicker = function () {
 
       this.$dp.on('click', this.cssSelectors.dpDate, this.selectDate.bind(this));
       this.$dp.on(EVENT_DATE_PICKER_FORCE_EDIT, this.forceEditHandler.bind(this));
+
+      // listen to other datepicker instances
+      $('body').on(EVENT_DATE_PICKER_ENTER, function (ev) {
+        if (ev.target !== this.$dp.get(0)) {
+          // some other datepicker in the same page entered drop-down state
+          this.$dp.removeAttr('tabindex');
+          this.$dpDisplay.attr('disabled', true);
+        }
+      }.bind(this));
+
+      $('body').on(EVENT_DATE_PICKER_EXIT, function (ev) {
+        console.log('exit');
+        if (ev.target !== this.$dp.get(0)) {
+          // some other datepicker in the same page exited drop-down state
+          this.$dp.attr('tabindex', '0');
+          this.$dpDisplay.removeAttr('disabled');
+        }
+      }.bind(this));
     }
   }, {
     key: 'show',
     value: function show() {
       this.reset();
       this.$dp.addClass(getClassNameFromSelector(this.cssSelectors.dpFocused));
+
+      this.$dp.trigger(EVENT_DATE_PICKER_ENTER);
     }
   }, {
     key: 'hide',
     value: function hide() {
       this.$dp.removeClass(getClassNameFromSelector(this.cssSelectors.dpFocused));
+
+      this.$dp.trigger(EVENT_DATE_PICKER_EXIT);
+      this.$dp.blur(); // to avoid looping on the same instance when navigating with keyboard
     }
   }, {
     key: 'forceEditHandler',
@@ -202,10 +271,14 @@ var DatePicker = function () {
       var focusClass = getClassNameFromSelector(this.cssSelectors.focus);
       var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled);
 
-      var $focussedMonth = $(this.cssSelectors.dpMonth + this.cssSelectors.focus);
+      var $focussedMonth = this.$dp.find(this.cssSelectors.dpMonth + this.cssSelectors.focus);
       if (!$focussedMonth.length) {
-        $focussedMonth = $(this.cssSelectors.dpMonth + ':not(' + this.cssSelectors.disabled + ')').first();
+        $focussedMonth = this.$dp.find(this.cssSelectors.dpMonth + ':not(' + this.cssSelectors.disabled + ')').first();
         $focussedMonth.addClass(focusClass);
+      }
+
+      if (!ev) {
+        return;
       }
 
       var $targetMonth;
@@ -245,7 +318,7 @@ var DatePicker = function () {
 
         case upKey:
         case downKey:
-          var $months = $(this.cssSelectors.dpMonth);
+          var $months = this.$dp.find(this.cssSelectors.dpMonth);
           var idx = $months.index($focussedMonth);
 
           if (idx < 6) {
@@ -261,6 +334,8 @@ var DatePicker = function () {
 
         case enterKey:
           $focussedMonth.click();
+          this.$dpCalWrapper.focus();
+          this._navigateDateWithKeys();
       }
     }
 
@@ -278,17 +353,21 @@ var DatePicker = function () {
       var downKey = 40;
       var enterKey = 13;
 
-      var $dates = $(this.cssSelectors.dpDate).filter(':not(' + this.cssSelectors.empty + ')');
+      var $dates = this.$dp.find(this.cssSelectors.dpDate).filter(':not(' + this.cssSelectors.empty + ')');
       var focusClass = getClassNameFromSelector(this.cssSelectors.focus);
       var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled);
 
-      var $focussedDate = $dates.filter(this.cssSelectors.focus);
-      if (!$focussedDate.length) {
-        $focussedDate = $dates.filter(':not(' + this.cssSelectors.disabled + ')').first();
-        $focussedDate.addClass(focusClass);
+      var $focusedDate = $dates.filter(this.cssSelectors.focus);
+      if (!$focusedDate.length) {
+        $focusedDate = $dates.filter(':not(' + this.cssSelectors.disabled + ')').first();
+        $focusedDate.addClass(focusClass);
       }
 
-      var idx = $dates.index($focussedDate);
+      if (!ev) {
+        return;
+      }
+
+      var idx = $dates.index($focusedDate);
       var $targetDate;
 
       switch (ev.keyCode) {
@@ -357,7 +436,7 @@ var DatePicker = function () {
           break;
 
         case enterKey:
-          $focussedDate.click();
+          $focusedDate.click();
           break;
       }
     }
@@ -426,7 +505,7 @@ var DatePicker = function () {
     key: '_getMonthWrapperHtml',
     value: function _getMonthWrapperHtml() {
       if (!this.$year) {
-        this.$year = $(this.cssSelectors.jsYear);
+        this.$year = this.$dp.find(this.cssSelectors.jsYear);
       }
 
       var monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -549,8 +628,8 @@ var DatePicker = function () {
   }, {
     key: '_getSelectedMonth',
     value: function _getSelectedMonth() {
-      var $selectedMonth = $(this.cssSelectors.dpMonth + this.cssSelectors.active);
-      var $allMonths = $(this.cssSelectors.dpMonth);
+      var $selectedMonth = this.$dp.find(this.cssSelectors.dpMonth + this.cssSelectors.active);
+      var $allMonths = this.$dp.find(this.cssSelectors.dpMonth);
       return $allMonths.index($selectedMonth);
     }
   }, {
@@ -604,7 +683,7 @@ function getClassNameFromSelector(selector) {
   return selector.replace('.', '');
 }
 
-$.fn.zyreDatePicker = function () {
+$.fn.datepicker = function () {
   'use strict';
 
   $(this).each(function () {

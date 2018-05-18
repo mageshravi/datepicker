@@ -4,34 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Zyre DatePicker</title>
+    <title>DatePicker</title>
     <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="fonts/InterUI/inter-ui.css">
     <link rel="stylesheet" href="css/datepicker.css">
+    <style>
+    html, body {
+        font-family: 'Inter UI', sans-serif;
+    }
+    </style>
 </head>
 <body>
-    <h1>Zyre DatePicker</h1>
+    <h1>DatePicker</h1>
 
-    <h2>Assets</h2>
-    <pre class="prettyprint">&lt;link rel="stylesheet" href="css/font-awesome.min.css"&gt;
+    <h2>Simple usage</h2>
+
+    <h3>Assets</h3>
+    <pre class="prettyprint">&lt;link rel="stylesheet" href="fonts/InterUI/inter-ui.css"&gt;
+&lt;link rel="stylesheet" href="css/font-awesome.min.css"&gt;
 &lt;link rel="stylesheet" href="css/datepicker.css"&gt;</pre>
     <pre class="prettyprint">&lt;script src="https://code.jquery.com/jquery-3.3.1.min.js"&gt;&lt;/script&gt;
 &lt;script src="js/datepicker.min.js"&gt;&lt;/script&gt;</pre>
 
-    <h2>HTML</h2>
-    <pre class="prettyprint">&lt;input type="text" name="date" id="zyre-date-picker"&gt;</pre>
+    <h3>HTML</h3>
+    <pre class="prettyprint">&lt;input type="text" name="date" class="datepicker"&gt;</pre>
 
-    <h2>JavaScript</h2>
-    <pre class="prettyprint">$('#zyre-date-picker').zyreDatePicker();</pre>
+    <h3>JavaScript</h3>
+    <pre class="prettyprint">$('.datepicker').datepicker();</pre>
 
-    <h2>Output</h2>
-    <input type="text" name="date" id="zyre-date-picker">
+    <h3>Output</h3>
+    <input type="text" name="date" class="js-datepicker">
+
+    <h2>Additional options</h2>
+
+    <h3>With value</h3>
+    <pre class="prettyprint">&lt;input type="text" class="datepicker" name="date" value="2017-04-14"&gt;</pre>
+    <input type="text" class="js-datepicker" name="date" value="2017-04-14">
+
+    <h3>With min-date</h3>
+    <pre class="prettyprint">&lt;input type="text" class="datepicker" name="date" data-min-date="today"&gt;</pre>
+    <input type="text" class="js-datepicker" name="date" data-min-date="today">
+    <br>
+
+    <pre class="prettyprint">&lt;input type="text" class="datepicker" name="date" value="tomorrow" data-min-date="tomorrow"&gt;</pre>
+    <input type="text" class="js-datepicker" name="date" value="tomorrow" data-min-date="tomorrow">
+    <br>
+
+    <pre class="prettyprint">&lt;input type="text" class="datepicker" name="date" value="2020-10-10"&gt;</pre>
+    <input type="text" class="js-datepicker" name="date" value="2020-10-10" data-min-date="tomorrow">
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="js/datepicker.min.js"></script>
     <script type="text/javascript">
     $(function () {
         'use strict';
-        $('#zyre-date-picker').zyreDatePicker();
+        $('.js-datepicker').datepicker();
     })
     </script>
     <script src='https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js'></script>
