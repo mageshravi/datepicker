@@ -101,6 +101,13 @@
       cursor: default; }
     .c-date-picker__date.active {
       background-color: #D4E7F1; }
+  .c-date-picker__time-wrapper {
+    padding: 5px 10px;
+    text-align: center;
+    background-color: #364350; }
+    .c-date-picker__time-wrapper > div {
+      margin: 0 auto;
+      display: inline-block; }
   .c-date-picker__overlay {
     position: fixed;
     top: 0;

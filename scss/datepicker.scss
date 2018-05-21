@@ -150,6 +150,17 @@ $dp-overlay-zIndex: 1;
     }
   }
 
+  &__time-wrapper {
+    padding: 5px 10px;
+    text-align: center;
+    background-color: #364350;
+
+    > div {
+      margin: 0 auto;
+      display: inline-block;
+    }
+  }
+
   &__overlay {
     position: fixed;
     top: 0;

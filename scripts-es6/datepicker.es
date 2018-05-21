@@ -13,6 +13,10 @@ var EVENT_DATE_PICKER_EXIT = 'date-picker:exit'
  * @version 1.0.0
  */
 class DatePicker {
+
+  static get FORMAT_DATE () { return 'date' }
+  static get FORMAT_DATETIME () { return 'datetime' }
+
   /**
    * Creates a DatePicker instance
    * @param $input {jQuery}
@@ -31,6 +35,7 @@ class DatePicker {
       dpCalWrapper: '.c-date-picker__cal-wrapper',
       dpWeekWrapper: '.c-date-picker__week-wrapper',
       dpDate: '.c-date-picker__date',
+      dpTimeWrapper: '.c-date-picker__time-wrapper',
       dpOverlay: '.c-date-picker__overlay',
       focus: '.focus',
       active: '.active',
@@ -38,7 +43,10 @@ class DatePicker {
       disabled: '.disabled',
       jsPrevYear: '.js-date-picker-prev-year',
       jsYear: '.js-date-picker-year',
-      jsNextYear: '.js-date-picker-next-year'
+      jsNextYear: '.js-date-picker-next-year',
+      jsHour: '.js-date-picker-hour',
+      jsMinute: '.js-date-picker-minute',
+      jsMeridian: '.js-date-picker-meridian'
     }
 
     this.$input = $input
@@ -65,6 +73,20 @@ class DatePicker {
       this.defaults.value = parseDateFromString('today')
     } else {
       this.defaults.value = value
+    }
+
+    var formatStr = this.$input.data('format')
+    if (!formatStr) {
+      formatStr = DatePicker.FORMAT_DATE
+    }
+
+    var allowedFormats = [
+      DatePicker.FORMAT_DATE,
+      DatePicker.FORMAT_DATETIME
+    ]
+
+    if (allowedFormats.indexOf(formatStr) !== -1) {
+      this.defaults.format = formatStr
     }
 
     /**
@@ -98,26 +120,41 @@ class DatePicker {
     this.$dp.insertAfter(this.$input)
 
     this.$dpDisplay = $('<input type="text" class="' + dpDisplayClass + '" readonly>')
-    this.$dpDisplay.val(getFormattedDate(this.defaults.value))
+    var displayValue = getFormattedDate(this.defaults.value)
+    if (this.defaults.format === DatePicker.FORMAT_DATETIME) {
+      displayValue = getFormattedDateTime(this.defaults.value, true)
+    }
+    this.$dpDisplay.val(displayValue)
     this.$dp.append(this.$dpDisplay)
 
     var $dpDropDown = $('<div class="' + dpDropDown + '"></div>')
     this.$dp.append($dpDropDown)
 
-    this.$dpYearWrapper = $(this._getYearWrapperHtml())
+    this.$dpYearWrapper = $(this.getYearWrapperHtml())
     $dpDropDown.append(this.$dpYearWrapper)
 
-    this.$dpMonthWrapper = $(this._getMonthWrapperHtml())
+    this.$dpMonthWrapper = $(this.getMonthWrapperHtml())
     $dpDropDown.append(this.$dpMonthWrapper)
 
-    this.$dpCalWrapper = $(this._getCalWrapperHtml())
+    this.$dpCalWrapper = $(this.getCalWrapperHtml())
     $dpDropDown.append(this.$dpCalWrapper)
+
+    if (this.defaults.format === DatePicker.FORMAT_DATETIME) {
+      this.$dpTimeWrapper = $(this.getTimeWrapperHtml())
+      $dpDropDown.append(this.$dpTimeWrapper)
+    }
 
     this.$input.attr('type', 'hidden')
     this.$dp.append(this.$input)
 
-    this.$dpOverlay = $(this._getOverlayHtml())
+    this.$dpOverlay = $(this.getOverlayHtml())
     this.$dp.append(this.$dpOverlay)
+
+    // init references
+    this.$year = this.$dp.find(this.cssSelectors.jsYear)
+    this.$hour = this.$dp.find(this.cssSelectors.jsHour)
+    this.$minute = this.$dp.find(this.cssSelectors.jsMinute)
+    this.$meridian = this.$dp.find(this.cssSelectors.jsMeridian)
   }
 
   bindUIActions () {
@@ -125,46 +162,55 @@ class DatePicker {
     this.$dpDisplay.on('focus', this.show.bind(this))
     this.$dpOverlay.on('click', this.hide.bind(this))
 
-        // decrement year
+    // decrement year
     this.$dp.on('click', this.cssSelectors.jsPrevYear, function () {
       'use strict'
       this.$year.val(parseInt(this.$year.val()) - 1)
       this.$dp.trigger(EVENT_DATE_PICKER_YEAR_UPDATE)
     }.bind(this))
 
-        // increment year
+    // increment year
     this.$dp.on('click', this.cssSelectors.jsNextYear, function () {
       'use strict'
       this.$year.val(parseInt(this.$year.val()) + 1)
       this.$dp.trigger(EVENT_DATE_PICKER_YEAR_UPDATE)
     }.bind(this))
 
+    this.$year.on('change', function (ev) {
+      this.updateMonth()
+    }.bind(this))
+
     this.$year.on('keyup', function (ev) {
       if (ev.keyCode !== 13) {
+        this.$dpMonthWrapper.hide()
+        this.$dpCalWrapper.hide()
         return
       }
 
-      this.updateMonth()
+      this.$dpMonthWrapper.show()
+      this.$dpCalWrapper.show()
+
       this.$dpMonthWrapper.focus()
-      this._navigateMonthsWithKeys()
+      this.navigateMonthsWithKeys()
     }.bind(this))
 
     this.$year.on('blur', function (ev) {
-      this.updateMonth()
       this.$dpMonthWrapper.focus()
     }.bind(this))
 
     this.$dp.on(EVENT_DATE_PICKER_YEAR_UPDATE, this.updateMonth.bind(this))
     this.$dp.on(EVENT_DATE_PICKER_MONTH_UPDATE, this.updateCal.bind(this))
 
-    this.$dp.on('keyup', this.cssSelectors.dpMonthWrapper, this._navigateMonthsWithKeys.bind(this))
+    this.$dp.on('keyup', this.cssSelectors.dpMonthWrapper, this.navigateMonthsWithKeys.bind(this))
 
     this.$dp.on('click', this.cssSelectors.dpMonth, this.selectMonth.bind(this))
 
-    this.$dp.on('keyup', this.cssSelectors.dpCalWrapper, this._navigateDateWithKeys.bind(this))
+    this.$dp.on('keyup', this.cssSelectors.dpCalWrapper, this.navigateDateWithKeys.bind(this))
 
     this.$dp.on('click', this.cssSelectors.dpDate, this.selectDate.bind(this))
     this.$dp.on(EVENT_DATE_PICKER_FORCE_EDIT, this.forceEditHandler.bind(this))
+
+    this.$dp.on('click', this.cssSelectors.dpTimeWrapper + ' button', this.setTimeAndHide.bind(this))
 
     // listen to other datepicker instances
     $('body').on(EVENT_DATE_PICKER_ENTER, function (ev) {
@@ -176,7 +222,6 @@ class DatePicker {
     }.bind(this))
 
     $('body').on(EVENT_DATE_PICKER_EXIT, function (ev) {
-      console.log('exit')
       if (ev.target !== this.$dp.get(0)) {
         // some other datepicker in the same page exited drop-down state
         this.$dp.attr('tabindex', '0')
@@ -189,12 +234,14 @@ class DatePicker {
     this.reset()
     this.$dp.addClass(getClassNameFromSelector(this.cssSelectors.dpFocused))
 
+    $('html,body').css({'overflow': 'hidden'})
     this.$dp.trigger(EVENT_DATE_PICKER_ENTER)
   }
 
   hide () {
     this.$dp.removeClass(getClassNameFromSelector(this.cssSelectors.dpFocused))
 
+    $('html,body').css({'overflow': 'auto'})
     this.$dp.trigger(EVENT_DATE_PICKER_EXIT)
     this.$dp.blur() // to avoid looping on the same instance when navigating with keyboard
   }
@@ -210,18 +257,18 @@ class DatePicker {
 
         // update month-wrapper
     this.$dpMonthWrapper.remove()
-    this.$dpMonthWrapper = $(this._getMonthWrapperHtml())
+    this.$dpMonthWrapper = $(this.getMonthWrapperHtml())
     this.$dpMonthWrapper.insertAfter(this.$dpYearWrapper)
 
         // update cal-wrapper
     this.$dpCalWrapper.remove()
-    this.$dpCalWrapper = $(this._getCalWrapperHtml())
+    this.$dpCalWrapper = $(this.getCalWrapperHtml())
     this.$dpCalWrapper.insertAfter(this.$dpMonthWrapper)
   }
 
   updateMonth () {
     var $oldMonthWrapper = this.$dpMonthWrapper
-    this.$dpMonthWrapper = $(this._getMonthWrapperHtml())
+    this.$dpMonthWrapper = $(this.getMonthWrapperHtml())
     $oldMonthWrapper.replaceWith(this.$dpMonthWrapper)
 
     this.$dp.trigger(EVENT_DATE_PICKER_MONTH_UPDATE)
@@ -229,7 +276,7 @@ class DatePicker {
 
   updateCal () {
     this.$dpCalWrapper.remove()
-    this.$dpCalWrapper = $(this._getCalWrapperHtml())
+    this.$dpCalWrapper = $(this.getCalWrapperHtml())
     this.$dpCalWrapper.insertAfter(this.$dpMonthWrapper)
   }
 
@@ -237,7 +284,7 @@ class DatePicker {
    * Navigate months with arrow keys
    * @param ev {Event}
    */
-  _navigateMonthsWithKeys (ev) {
+  navigateMonthsWithKeys (ev) {
     var leftKey = 37
     var upKey = 38
     var rightKey = 39
@@ -247,10 +294,17 @@ class DatePicker {
     var focusClass = getClassNameFromSelector(this.cssSelectors.focus)
     var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
 
-    var $focussedMonth = this.$dp.find(this.cssSelectors.dpMonth + this.cssSelectors.focus)
-    if (!$focussedMonth.length) {
-      $focussedMonth = this.$dp.find(this.cssSelectors.dpMonth + ':not(' + this.cssSelectors.disabled + ')').first()
-      $focussedMonth.addClass(focusClass)
+    // check for focused month
+    var $focusedMonth = this.$dp.find(this.cssSelectors.dpMonth + this.cssSelectors.focus)
+    if (!$focusedMonth.length) {
+      // check for active month
+      $focusedMonth = this.$dp.find(this.cssSelectors.dpMonth + this.cssSelectors.active)
+      $focusedMonth.addClass(focusClass)
+    }
+    if (!$focusedMonth.length) {
+      // get this first non-disabled month
+      $focusedMonth = this.$dp.find(this.cssSelectors.dpMonth + ':not(' + this.cssSelectors.disabled + ')').first()
+      $focusedMonth.addClass(focusClass)
     }
 
     if (!ev) {
@@ -261,16 +315,16 @@ class DatePicker {
 
     switch (ev.keyCode) {
       case leftKey:
-        $targetMonth = $focussedMonth.prev()
+        $targetMonth = $focusedMonth.prev()
 
         if (!$targetMonth.length) {
           // prev item does not exist. go to last item.
-          $targetMonth = $focussedMonth.siblings(':last')
+          $targetMonth = $focusedMonth.siblings(':last')
         }
 
         if ($targetMonth.hasClass(disabledClass)) {
           // item disabled. go to last item that is NOT disabled.
-          $targetMonth = $focussedMonth.siblings(':not(' + this.cssSelectors.disabled + ')').last()
+          $targetMonth = $focusedMonth.siblings(':not(' + this.cssSelectors.disabled + ')').last()
         }
 
         $targetMonth.addClass(focusClass)
@@ -278,16 +332,16 @@ class DatePicker {
         break
 
       case rightKey:
-        $targetMonth = $focussedMonth.next()
+        $targetMonth = $focusedMonth.next()
 
         if (!$targetMonth.length) {
           // next item does not exist. go to first item.
-          $targetMonth = $focussedMonth.siblings(':first')
+          $targetMonth = $focusedMonth.siblings(':first')
         }
 
         if ($targetMonth.hasClass(disabledClass)) {
           // item disabled. go to first item that is NOT disabled.
-          $targetMonth = $focussedMonth.siblings(':not(' + this.cssSelectors.disabled + ')').first()
+          $targetMonth = $focusedMonth.siblings(':not(' + this.cssSelectors.disabled + ')').first()
         }
 
         $targetMonth.addClass(focusClass)
@@ -297,7 +351,7 @@ class DatePicker {
       case upKey:
       case downKey:
         var $months = this.$dp.find(this.cssSelectors.dpMonth)
-        var idx = $months.index($focussedMonth)
+        var idx = $months.index($focusedMonth)
 
         if (idx < 6) {
           $targetMonth = $months.eq(idx + 6)
@@ -312,9 +366,9 @@ class DatePicker {
         break
 
       case enterKey:
-        $focussedMonth.click()
+        $focusedMonth.click()
         this.$dpCalWrapper.focus()
-        this._navigateDateWithKeys()
+        this.navigateDateWithKeys()
     }
   }
 
@@ -322,7 +376,7 @@ class DatePicker {
    * Navigate date with arrow keys
    * @param ev {Event}
    */
-  _navigateDateWithKeys (ev) {
+  navigateDateWithKeys (ev) {
     var leftKey = 37
     var upKey = 38
     var rightKey = 39
@@ -452,7 +506,7 @@ class DatePicker {
 
     // update this.defaults.value
     var year = this.$year.val()
-    var month = this._getSelectedMonth()
+    var month = this.getSelectedMonth()
     var selectedDate = parseInt($li.text())
     this.defaults.value = new Date(year, month, selectedDate)
 
@@ -462,10 +516,45 @@ class DatePicker {
     // update input value
     this.$input.val(getFormattedDate(this.defaults.value))
 
-    this.hide()
+    if (this.defaults.format === DatePicker.FORMAT_DATE) {
+      this.hide()
+    } else if (this.defaults.format === DatePicker.FORMAT_DATETIME) {
+      this.$hour.focus()
+    }
   }
 
-  _getYearWrapperHtml () {
+  setTimeAndHide () {
+    var year = this.$year.val()
+    var month = this.getSelectedMonth()
+    var selectedDate = this.getSelectedDate()
+    var hour = parseInt(this.$hour.val())
+    var minute = parseInt(this.$minute.val())
+    var meridian = this.$meridian.val()
+
+    if (!hour) {
+      this.$hour.focus()
+    } else if (!minute) {
+      this.$minute.focus()
+    } else if (!meridian) {
+      this.$meridian.focus()
+    } else {
+      if (meridian === 'pm') {
+        hour += 12
+      }
+
+      var dt = new Date(year, month, selectedDate, hour, minute)
+      if (isNaN(dt)) {
+        console.log(`Invalid date: year:${year} month:${month} date:${selectedDate} hour:${hour} minute:${minute}`)
+        return
+      }
+      this.$dpDisplay.val(getFormattedDateTime(dt, true))
+      this.$input.val(getFormattedDateTime(dt))
+      this.defaults.value = dt
+      this.hide()
+    }
+  }
+
+  getYearWrapperHtml () {
     var yearWrapperClass = getClassNameFromSelector(this.cssSelectors.dpYearWrapper)
 
     var prevYearClass = getClassNameFromSelector(this.cssSelectors.jsPrevYear)
@@ -481,7 +570,7 @@ class DatePicker {
     ].join('')
   }
 
-  _getMonthWrapperHtml () {
+  getMonthWrapperHtml () {
     if (!this.$year) {
       this.$year = this.$dp.find(this.cssSelectors.jsYear)
     }
@@ -537,7 +626,7 @@ class DatePicker {
     return html.join('')
   }
 
-  _getCalWrapperHtml () {
+  getCalWrapperHtml () {
     var dpCalWrapper = getClassNameFromSelector(this.cssSelectors.dpCalWrapper)
     var dpWeekWrapper = getClassNameFromSelector(this.cssSelectors.dpWeekWrapper)
     var dpDate = getClassNameFromSelector(this.cssSelectors.dpDate)
@@ -564,7 +653,7 @@ class DatePicker {
     html.push('<ul class="' + dpWeekWrapper + '">')
 
     var selectedYear = this.$year.val()
-    var selectedMonth = this._getSelectedMonth()
+    var selectedMonth = this.getSelectedMonth()
 
     if (selectedMonth === -1) {
       return
@@ -614,13 +703,55 @@ class DatePicker {
     return html.join('')
   }
 
-  _getSelectedMonth () {
+  getTimeWrapperHtml () {
+    var timeWrapperClassName = getClassNameFromSelector(this.cssSelectors.dpTimeWrapper)
+    var hourClassName = getClassNameFromSelector(this.cssSelectors.jsHour)
+    var minClassName = getClassNameFromSelector(this.cssSelectors.jsMinute)
+    var meridianClassName = getClassNameFromSelector(this.cssSelectors.jsMeridian)
+
+    var hour = `<select class="${hourClassName}">
+      <option value="">hh</option>`
+    for (var i = 1; i <= 12; i++) {
+      i = ('0' + i).slice(-2)
+      hour += `<option value="${i}">${i}</option>`
+    }
+    hour += '</select>'
+
+    var minOptions = [0, 15, 30, 45]
+    var min = `<select class="${minClassName}">
+      <option value="">mm</option>`
+    for (var j in minOptions) {
+      var opt = ('0' + minOptions[j]).slice(-2)
+      min += `<option value="${opt}">${opt}</option>`
+    }
+    min += '</select>'
+
+    var meridian = `<select class="${meridianClassName}">
+      <option value="">----</option>
+      <option value="am">am</option>
+      <option value="pm">pm</option>
+    </select>`
+
+    return `<div class="${timeWrapperClassName}">
+      <div>
+        ${hour}&nbsp;${min}&nbsp;${meridian}
+        <button>Go</button>
+      </div>
+    </div>`
+  }
+
+  getSelectedMonth () {
     var $selectedMonth = this.$dp.find(this.cssSelectors.dpMonth + this.cssSelectors.active)
     var $allMonths = this.$dp.find(this.cssSelectors.dpMonth)
     return $allMonths.index($selectedMonth)
   }
 
-  _getOverlayHtml () {
+  getSelectedDate () {
+    var $selectedDate = this.$dp.find(this.cssSelectors.dpDate + this.cssSelectors.active)
+    return parseInt($selectedDate.text())
+  }
+
+  getOverlayHtml () {
     var overlayClass = getClassNameFromSelector(this.cssSelectors.dpOverlay)
     return '<div class="' + overlayClass + '"></div>'
   }
@@ -640,6 +771,39 @@ function getFormattedDate (dt) {
     ('0' + (dt.getMonth() + 1)).slice(-2),
     ('0' + dt.getDate()).slice(-2)
   ].join('-')
+}
+
+/**
+ * Returns the date formatted as Y-m-d H:i:s with leading zeros.
+ * If display is set to true, the format is Y-m-d at h:m a.
+ *
+ * @param dt {Date}
+ * @param display {Boolean}
+ */
+function getFormattedDateTime (dt, display = false) {
+  var time = [
+    ('0' + dt.getHours()).slice(-2),
+    ('0' + dt.getMinutes()).slice(-2),
+    ('0' + dt.getSeconds()).slice(-2)
+  ].join(':')
+
+  if (display) {
+    var hours = dt.getHours()
+    var a = 'am'
+    if (hours > 12) {
+      hours = hours - 12
+      a = 'pm'
+    }
+
+    time = [
+      ('0' + hours).slice(-2),
+      ('0' + dt.getMinutes()).slice(-2)
+    ].join(':')
+
+    time = `${time} ${a}`
+  }
+
+  return `${getFormattedDate(dt)} ${time}`
 }
 
 /**

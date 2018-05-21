@@ -1,5 +1,5 @@
 {
-  "name": "wbn-simple-datepicker",
+  "name": "mr-datepicker",
   "version": "0.1.0beta",
   "description": "Simple datepicker",
   "main": "npm_init.js",
@@ -26,7 +26,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/webinative/wbn-simple-datepicker"
+    "url": "https://github.com/mageshravi/datepicker"
   },
   "author": "Magesh Ravi <magesh@webinative.com>",
   "license": "BSD-2-Clause",
