@@ -73,7 +73,12 @@ $dp-overlay-zIndex: 1;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
+
+    &:focus {
+      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35);
+    }
   }
+
   &__month {
     margin: 5px 0;
     border: 1px solid transparent;
@@ -83,7 +88,8 @@ $dp-overlay-zIndex: 1;
     border-radius: 4px;
     cursor: pointer;
 
-    &.disabled {
+    &.disabled,
+    .disabled & {
       background-color: #5C6772;
       cursor: not-allowed;
 
@@ -99,6 +105,11 @@ $dp-overlay-zIndex: 1;
     &.active:focus,
     &.active.focus {
       box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+    }
+
+    &.active.disabled,
+    .disabled &.active {
+      background-color: rgba(255, 255, 255, 0.5);
     }
 
     &.focus,
@@ -130,8 +141,13 @@ $dp-overlay-zIndex: 1;
       background-color: #ECF0F2;
     }
 
+    &.focus {
+      box-shadow: inset 0 0px 1px 0px rgba(0,0,0,0.35);
+    }
+
     &.empty,
-    &.disabled {
+    &.disabled,
+    .disabled & {
       opacity: 0.5;
       cursor: not-allowed;
 
@@ -158,6 +174,20 @@ $dp-overlay-zIndex: 1;
     > div {
       margin: 0 auto;
       display: inline-block;
+    }
+
+    select {
+      &:focus {
+        outline: 1px dotted rgba(255, 255, 255, 0.75);
+      }
+    }
+
+    button {
+      padding: 2px 6px;
+
+      &:focus {
+        outline: 1px dotted rgba(255, 255, 255, 0.75);
+      }
     }
   }
 

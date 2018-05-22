@@ -55,6 +55,8 @@
         flex-wrap: wrap;
     -ms-flex-pack: justify;
         justify-content: space-between; }
+    .c-date-picker__month-wrapper:focus {
+      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35); }
   .c-date-picker__month {
     margin: 5px 0;
     border: 1px solid transparent;
@@ -63,15 +65,21 @@
     background-color: #93A0AE;
     border-radius: 4px;
     cursor: pointer; }
-    .c-date-picker__month.disabled {
+    .c-date-picker__month.disabled,
+    .disabled .c-date-picker__month {
       background-color: #5C6772;
       cursor: not-allowed; }
-      .c-date-picker__month.disabled:focus, .c-date-picker__month.disabled:hover {
+      .c-date-picker__month.disabled:focus, .c-date-picker__month.disabled:hover,
+      .disabled .c-date-picker__month:focus,
+      .disabled .c-date-picker__month:hover {
         border-color: transparent; }
     .c-date-picker__month.active {
       background-color: white; }
     .c-date-picker__month.active:focus, .c-date-picker__month.active.focus {
       box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5); }
+    .c-date-picker__month.active.disabled,
+    .disabled .c-date-picker__month.active {
+      background-color: rgba(255, 255, 255, 0.5); }
     .c-date-picker__month.focus, .c-date-picker__month:focus, .c-date-picker__month:hover {
       border-color: #ffffff; }
   .c-date-picker__week-wrapper {
@@ -92,10 +100,15 @@
     cursor: pointer; }
     .c-date-picker__date.focus, .c-date-picker__date:focus, .c-date-picker__date:hover {
       background-color: #ECF0F2; }
-    .c-date-picker__date.empty, .c-date-picker__date.disabled {
+    .c-date-picker__date.focus {
+      box-shadow: inset 0 0px 1px 0px rgba(0, 0, 0, 0.35); }
+    .c-date-picker__date.empty, .c-date-picker__date.disabled,
+    .disabled .c-date-picker__date {
       opacity: 0.5;
       cursor: not-allowed; }
-      .c-date-picker__date.empty:hover, .c-date-picker__date.empty:focus, .c-date-picker__date.disabled:hover, .c-date-picker__date.disabled:focus {
+      .c-date-picker__date.empty:hover, .c-date-picker__date.empty:focus, .c-date-picker__date.disabled:hover, .c-date-picker__date.disabled:focus,
+      .disabled .c-date-picker__date:hover,
+      .disabled .c-date-picker__date:focus {
         background-color: transparent; }
     .c-date-picker__date.empty {
       cursor: default; }
@@ -108,6 +121,12 @@
     .c-date-picker__time-wrapper > div {
       margin: 0 auto;
       display: inline-block; }
+    .c-date-picker__time-wrapper select:focus {
+      outline: 1px dotted rgba(255, 255, 255, 0.75); }
+    .c-date-picker__time-wrapper button {
+      padding: 2px 6px; }
+      .c-date-picker__time-wrapper button:focus {
+        outline: 1px dotted rgba(255, 255, 255, 0.75); }
   .c-date-picker__overlay {
     position: fixed;
     top: 0;

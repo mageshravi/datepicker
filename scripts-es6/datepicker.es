@@ -180,15 +180,17 @@ class DatePicker {
       this.updateMonth()
     }.bind(this))
 
+    var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
+
     this.$year.on('keyup', function (ev) {
       if (ev.keyCode !== 13) {
-        this.$dpMonthWrapper.hide()
-        this.$dpCalWrapper.hide()
+        this.$dpMonthWrapper.addClass(disabledClass)
+        this.$dpCalWrapper.addClass(disabledClass)
         return
       }
 
-      this.$dpMonthWrapper.show()
-      this.$dpCalWrapper.show()
+      this.$dpMonthWrapper.removeClass(disabledClass)
+      this.$dpCalWrapper.removeClass(disabledClass)
 
       this.$dpMonthWrapper.focus()
       this.navigateMonthsWithKeys()
@@ -294,6 +296,10 @@ class DatePicker {
     var focusClass = getClassNameFromSelector(this.cssSelectors.focus)
     var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
 
+    if (this.$dpMonthWrapper.hasClass(disabledClass)) {
+      return
+    }
+
     // check for focused month
     var $focusedMonth = this.$dp.find(this.cssSelectors.dpMonth + this.cssSelectors.focus)
     if (!$focusedMonth.length) {
@@ -386,6 +392,10 @@ class DatePicker {
     var $dates = this.$dp.find(this.cssSelectors.dpDate).filter(':not(' + this.cssSelectors.empty + ')')
     var focusClass = getClassNameFromSelector(this.cssSelectors.focus)
     var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
+
+    if (this.$dpCalWrapper.hasClass(disabledClass)) {
+      return
+    }
 
     var $focusedDate = $dates.filter(this.cssSelectors.focus)
     if (!$focusedDate.length) {
@@ -516,6 +526,10 @@ class DatePicker {
     // update input value
     this.$input.val(getFormattedDate(this.defaults.value))
 
+    // clear the focus class (if used by keyboard navigation)
+    var focusClass = getClassNameFromSelector(this.cssSelectors.focus)
+    $(this.cssSelectors.dpDate).removeClass(focusClass)
+
     if (this.defaults.format === DatePicker.FORMAT_DATE) {
       this.hide()
     } else if (this.defaults.format === DatePicker.FORMAT_DATETIME) {
@@ -531,11 +545,11 @@ class DatePicker {
     var minute = parseInt(this.$minute.val())
     var meridian = this.$meridian.val()
 
-    if (!hour) {
+    if (hour === '') {
       this.$hour.focus()
-    } else if (!minute) {
+    } else if (minute === '') {
       this.$minute.focus()
-    } else if (!meridian) {
+    } else if (meridian === '') {
       this.$meridian.focus()
     } else {
       if (meridian === 'pm') {

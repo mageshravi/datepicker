@@ -202,15 +202,17 @@ var DatePicker = function () {
         this.updateMonth();
       }.bind(this));
 
+      var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled);
+
       this.$year.on('keyup', function (ev) {
         if (ev.keyCode !== 13) {
-          this.$dpMonthWrapper.hide();
-          this.$dpCalWrapper.hide();
+          this.$dpMonthWrapper.addClass(disabledClass);
+          this.$dpCalWrapper.addClass(disabledClass);
           return;
         }
 
-        this.$dpMonthWrapper.show();
-        this.$dpCalWrapper.show();
+        this.$dpMonthWrapper.removeClass(disabledClass);
+        this.$dpCalWrapper.removeClass(disabledClass);
 
         this.$dpMonthWrapper.focus();
         this.navigateMonthsWithKeys();
@@ -325,6 +327,10 @@ var DatePicker = function () {
       var focusClass = getClassNameFromSelector(this.cssSelectors.focus);
       var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled);
 
+      if (this.$dpMonthWrapper.hasClass(disabledClass)) {
+        return;
+      }
+
       // check for focused month
       var $focusedMonth = this.$dp.find(this.cssSelectors.dpMonth + this.cssSelectors.focus);
       if (!$focusedMonth.length) {
@@ -417,6 +423,10 @@ var DatePicker = function () {
       var $dates = this.$dp.find(this.cssSelectors.dpDate).filter(':not(' + this.cssSelectors.empty + ')');
       var focusClass = getClassNameFromSelector(this.cssSelectors.focus);
       var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled);
+
+      if (this.$dpCalWrapper.hasClass(disabledClass)) {
+        return;
+      }
 
       var $focusedDate = $dates.filter(this.cssSelectors.focus);
       if (!$focusedDate.length) {
@@ -549,6 +559,10 @@ var DatePicker = function () {
       // update input value
       this.$input.val(getFormattedDate(this.defaults.value));
 
+      // clear the focus class (if used by keyboard navigation)
+      var focusClass = getClassNameFromSelector(this.cssSelectors.focus);
+      $(this.cssSelectors.dpDate).removeClass(focusClass);
+
       if (this.defaults.format === DatePicker.FORMAT_DATE) {
         this.hide();
       } else if (this.defaults.format === DatePicker.FORMAT_DATETIME) {
@@ -565,17 +579,17 @@ var DatePicker = function () {
       var minute = parseInt(this.$minute.val());
       var meridian = this.$meridian.val();
 
-      if (!hour) {
+      if (hour === '') {
         this.$hour.focus();
-      } else if (!minute) {
+      } else if (minute === '') {
         this.$minute.focus();
-      } else if (!meridian) {
+      } else if (meridian === '') {
         this.$meridian.focus();
       } else {
         if (meridian === 'pm') {
           hour += 12;
         }
-        console.log('Date: year:' + year + ' month:' + month + ' date:' + selectedDate + ' hour:' + hour + ' minute:' + minute);
+
         var dt = new Date(year, month, selectedDate, hour, minute);
         if (isNaN(dt)) {
           console.log('Invalid date: year:' + year + ' month:' + month + ' date:' + selectedDate + ' hour:' + hour + ' minute:' + minute);
@@ -583,6 +597,7 @@ var DatePicker = function () {
         }
         this.$dpDisplay.val(getFormattedDateTime(dt, true));
         this.$input.val(getFormattedDateTime(dt));
+        this.defaults.value = dt;
         this.hide();
       }
     }
