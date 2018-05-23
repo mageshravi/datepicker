@@ -176,12 +176,6 @@ $dp-overlay-zIndex: 1;
       display: inline-block;
     }
 
-    select {
-      &:focus {
-        outline: 1px dotted rgba(255, 255, 255, 0.75);
-      }
-    }
-
     button {
       padding: 2px 6px;
 
@@ -189,6 +183,36 @@ $dp-overlay-zIndex: 1;
         outline: 1px dotted rgba(255, 255, 255, 0.75);
       }
     }
+  }
+
+  &__select-label {
+    background-color: #F2F2F2;
+    display: inline-block;
+    position: relative;
+    border-radius: 4px;
+
+    &::after {
+      content: '\f107';
+      font-family: 'FontAwesome';
+      display: inline-block;
+      position: absolute;
+      top: calc(50% - 0.5em);
+      right: 6px;
+      z-index: 0;
+    }
+
+    &:focus {
+      outline: 1px dotted rgba(255, 255, 255, 0.75);
+    }
+  }
+
+  &__select {
+    border: none;
+    padding: 5px 20px 5px 5px;
+    background-color: transparent;
+    appearance: none;
+    position: relative;
+    z-index: 1;
   }
 
   &__overlay {

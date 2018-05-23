@@ -55,6 +55,8 @@ var DatePicker = function () {
       dpWeekWrapper: '.c-date-picker__week-wrapper',
       dpDate: '.c-date-picker__date',
       dpTimeWrapper: '.c-date-picker__time-wrapper',
+      dpSelectMenuLabel: '.c-date-picker__select-label',
+      dpSelectMenu: '.c-date-picker__select',
       dpOverlay: '.c-date-picker__overlay',
       focus: '.focus',
       active: '.active',
@@ -740,26 +742,28 @@ var DatePicker = function () {
     key: 'getTimeWrapperHtml',
     value: function getTimeWrapperHtml() {
       var timeWrapperClassName = getClassNameFromSelector(this.cssSelectors.dpTimeWrapper);
+      var selectLabelClassName = getClassNameFromSelector(this.cssSelectors.dpSelectMenuLabel);
+      var selectMenuClassName = getClassNameFromSelector(this.cssSelectors.dpSelectMenu);
       var hourClassName = getClassNameFromSelector(this.cssSelectors.jsHour);
       var minClassName = getClassNameFromSelector(this.cssSelectors.jsMinute);
       var meridianClassName = getClassNameFromSelector(this.cssSelectors.jsMeridian);
 
-      var hour = '<select class="' + hourClassName + '">\n      <option value="">hh</option>';
+      var hour = '<label class="' + selectLabelClassName + '">\n    <select class="' + selectMenuClassName + ' ' + hourClassName + '">\n        <option value="">hh</option>';
       for (var i = 1; i <= 12; i++) {
         i = ('0' + i).slice(-2);
         hour += '<option value="' + i + '">' + i + '</option>';
       }
-      hour += '</select>';
+      hour += '</select></label>';
 
       var minOptions = [0, 15, 30, 45];
-      var min = '<select class="' + minClassName + '">\n      <option value="">mm</option>';
+      var min = '<label class="' + selectLabelClassName + '">\n    <select class="' + selectMenuClassName + ' ' + minClassName + '">\n      <option value="">mm</option>';
       for (var j in minOptions) {
         var opt = ('0' + minOptions[j]).slice(-2);
         min += '<option value="' + opt + '">' + opt + '</option>';
       }
-      min += '</select>';
+      min += '</select></label>';
 
-      var meridian = '<select class="' + meridianClassName + '">\n      <option value="">----</option>\n      <option value="am">am</option>\n      <option value="pm">pm</option>\n    </select>';
+      var meridian = '<label class="' + selectLabelClassName + '">\n    <select class="' + selectMenuClassName + ' ' + meridianClassName + '">\n      <option value="">----</option>\n      <option value="am">am</option>\n      <option value="pm">pm</option>\n    </select></label>';
 
       return '<div class="' + timeWrapperClassName + '">\n      <div>\n        ' + hour + '&nbsp;' + min + '&nbsp;' + meridian + '\n        <button>Go</button>\n      </div>\n    </div>';
     }

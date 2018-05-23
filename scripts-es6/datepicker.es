@@ -36,6 +36,8 @@ class DatePicker {
       dpWeekWrapper: '.c-date-picker__week-wrapper',
       dpDate: '.c-date-picker__date',
       dpTimeWrapper: '.c-date-picker__time-wrapper',
+      dpSelectMenuLabel: '.c-date-picker__select-label',
+      dpSelectMenu: '.c-date-picker__select',
       dpOverlay: '.c-date-picker__overlay',
       focus: '.focus',
       active: '.active',
@@ -719,32 +721,37 @@ class DatePicker {
 
   getTimeWrapperHtml () {
     var timeWrapperClassName = getClassNameFromSelector(this.cssSelectors.dpTimeWrapper)
+    var selectLabelClassName = getClassNameFromSelector(this.cssSelectors.dpSelectMenuLabel)
+    var selectMenuClassName = getClassNameFromSelector(this.cssSelectors.dpSelectMenu)
     var hourClassName = getClassNameFromSelector(this.cssSelectors.jsHour)
     var minClassName = getClassNameFromSelector(this.cssSelectors.jsMinute)
     var meridianClassName = getClassNameFromSelector(this.cssSelectors.jsMeridian)
 
-    var hour = `<select class="${hourClassName}">
-      <option value="">hh</option>`
+    var hour = `<label class="${selectLabelClassName}">
+    <select class="${selectMenuClassName} ${hourClassName}">
+        <option value="">hh</option>`
     for (var i = 1; i <= 12; i++) {
       i = ('0' + i).slice(-2)
       hour += `<option value="${i}">${i}</option>`
     }
-    hour += '</select>'
+    hour += `</select></label>`
 
     var minOptions = [0, 15, 30, 45]
-    var min = `<select class="${minClassName}">
+    var min = `<label class="${selectLabelClassName}">
+    <select class="${selectMenuClassName} ${minClassName}">
       <option value="">mm</option>`
     for (var j in minOptions) {
       var opt = ('0' + minOptions[j]).slice(-2)
       min += `<option value="${opt}">${opt}</option>`
     }
-    min += '</select>'
+    min += '</select></label>'
 
-    var meridian = `<select class="${meridianClassName}">
+    var meridian = `<label class="${selectLabelClassName}">
+    <select class="${selectMenuClassName} ${meridianClassName}">
       <option value="">----</option>
       <option value="am">am</option>
       <option value="pm">pm</option>
-    </select>`
+    </select></label>`
 
     return `<div class="${timeWrapperClassName}">
       <div>

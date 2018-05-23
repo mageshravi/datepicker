@@ -121,12 +121,34 @@
     .c-date-picker__time-wrapper > div {
       margin: 0 auto;
       display: inline-block; }
-    .c-date-picker__time-wrapper select:focus {
-      outline: 1px dotted rgba(255, 255, 255, 0.75); }
     .c-date-picker__time-wrapper button {
       padding: 2px 6px; }
       .c-date-picker__time-wrapper button:focus {
         outline: 1px dotted rgba(255, 255, 255, 0.75); }
+  .c-date-picker__select-label {
+    background-color: #F2F2F2;
+    display: inline-block;
+    position: relative;
+    border-radius: 4px; }
+    .c-date-picker__select-label::after {
+      content: '\f107';
+      font-family: 'FontAwesome';
+      display: inline-block;
+      position: absolute;
+      top: calc(50% - 0.5em);
+      right: 6px;
+      z-index: 0; }
+    .c-date-picker__select-label:focus {
+      outline: 1px dotted rgba(255, 255, 255, 0.75); }
+  .c-date-picker__select {
+    border: none;
+    padding: 5px 20px 5px 5px;
+    background-color: transparent;
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+    position: relative;
+    z-index: 1; }
   .c-date-picker__overlay {
     position: fixed;
     top: 0;
