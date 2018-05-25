@@ -727,12 +727,20 @@ class DatePicker {
     var minClassName = getClassNameFromSelector(this.cssSelectors.jsMinute)
     var meridianClassName = getClassNameFromSelector(this.cssSelectors.jsMeridian)
 
+    var selected = ''
+    var hourNow = this.defaults.value.getHours()
+    var minNow = this.defaults.value.getMinutes()
+
     var hour = `<label class="${selectLabelClassName}">
     <select class="${selectMenuClassName} ${hourClassName}">
         <option value="">hh</option>`
-    for (var i = 1; i <= 12; i++) {
+    for (var i = 0; i <= 12; i++) {
+      selected = ''
+      if (hourNow === i || hourNow % 12 === i) {
+        selected = ' selected '
+      }
       i = ('0' + i).slice(-2)
-      hour += `<option value="${i}">${i}</option>`
+      hour += `<option value="${i}" ${selected}>${i}</option>`
     }
     hour += `</select></label>`
 
@@ -741,22 +749,35 @@ class DatePicker {
     <select class="${selectMenuClassName} ${minClassName}">
       <option value="">mm</option>`
     for (var j in minOptions) {
+      selected = ''
+      var k = parseInt(j) + 1
+      if (minNow >= minOptions[j] && minNow < minOptions[k]) {
+        selected = ' selected '
+      }
       var opt = ('0' + minOptions[j]).slice(-2)
-      min += `<option value="${opt}">${opt}</option>`
+      min += `<option value="${opt}" ${selected}>${opt}</option>`
     }
     min += '</select></label>'
+
+    var amSelected = ''
+    var pmSelected = ''
+    if (hourNow < 12) {
+      amSelected = ' selected '
+    } else {
+      pmSelected = ' selected '
+    }
 
     var meridian = `<label class="${selectLabelClassName}">
     <select class="${selectMenuClassName} ${meridianClassName}">
       <option value="">----</option>
-      <option value="am">am</option>
-      <option value="pm">pm</option>
+      <option value="am" ${amSelected}>am</option>
+      <option value="pm" ${pmSelected}>pm</option>
     </select></label>`
 
     return `<div class="${timeWrapperClassName}">
       <div>
         ${hour}&nbsp;${min}&nbsp;${meridian}
-        <button>Go</button>
+        <button type="button">Go</button>
       </div>
     </div>`
   }
@@ -810,9 +831,12 @@ function getFormattedDateTime (dt, display = false) {
 
   if (display) {
     var hours = dt.getHours()
-    var a = 'am'
     if (hours > 12) {
-      hours = hours - 12
+      hours = hours % 12
+    }
+
+    var a = 'am'
+    if (dt.getHours() >= 12) {
       a = 'pm'
     }
 

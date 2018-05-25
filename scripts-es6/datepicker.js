@@ -748,24 +748,45 @@ var DatePicker = function () {
       var minClassName = getClassNameFromSelector(this.cssSelectors.jsMinute);
       var meridianClassName = getClassNameFromSelector(this.cssSelectors.jsMeridian);
 
+      var selected = '';
+      var hourNow = this.defaults.value.getHours();
+      var minNow = this.defaults.value.getMinutes();
+
       var hour = '<label class="' + selectLabelClassName + '">\n    <select class="' + selectMenuClassName + ' ' + hourClassName + '">\n        <option value="">hh</option>';
-      for (var i = 1; i <= 12; i++) {
+      for (var i = 0; i <= 12; i++) {
+        selected = '';
+        if (hourNow === i || hourNow % 12 === i) {
+          selected = ' selected ';
+        }
         i = ('0' + i).slice(-2);
-        hour += '<option value="' + i + '">' + i + '</option>';
+        hour += '<option value="' + i + '" ' + selected + '>' + i + '</option>';
       }
       hour += '</select></label>';
 
       var minOptions = [0, 15, 30, 45];
       var min = '<label class="' + selectLabelClassName + '">\n    <select class="' + selectMenuClassName + ' ' + minClassName + '">\n      <option value="">mm</option>';
       for (var j in minOptions) {
+        selected = '';
+        var k = parseInt(j) + 1;
+        if (minNow >= minOptions[j] && minNow < minOptions[k]) {
+          selected = ' selected ';
+        }
         var opt = ('0' + minOptions[j]).slice(-2);
-        min += '<option value="' + opt + '">' + opt + '</option>';
+        min += '<option value="' + opt + '" ' + selected + '>' + opt + '</option>';
       }
       min += '</select></label>';
 
-      var meridian = '<label class="' + selectLabelClassName + '">\n    <select class="' + selectMenuClassName + ' ' + meridianClassName + '">\n      <option value="">----</option>\n      <option value="am">am</option>\n      <option value="pm">pm</option>\n    </select></label>';
+      var amSelected = '';
+      var pmSelected = '';
+      if (hourNow < 12) {
+        amSelected = ' selected ';
+      } else {
+        pmSelected = ' selected ';
+      }
 
-      return '<div class="' + timeWrapperClassName + '">\n      <div>\n        ' + hour + '&nbsp;' + min + '&nbsp;' + meridian + '\n        <button>Go</button>\n      </div>\n    </div>';
+      var meridian = '<label class="' + selectLabelClassName + '">\n    <select class="' + selectMenuClassName + ' ' + meridianClassName + '">\n      <option value="">----</option>\n      <option value="am" ' + amSelected + '>am</option>\n      <option value="pm" ' + pmSelected + '>pm</option>\n    </select></label>';
+
+      return '<div class="' + timeWrapperClassName + '">\n      <div>\n        ' + hour + '&nbsp;' + min + '&nbsp;' + meridian + '\n        <button type="button">Go</button>\n      </div>\n    </div>';
     }
   }, {
     key: 'getSelectedMonth',
@@ -820,9 +841,12 @@ function getFormattedDateTime(dt) {
 
   if (display) {
     var hours = dt.getHours();
-    var a = 'am';
     if (hours > 12) {
-      hours = hours - 12;
+      hours = hours % 12;
+    }
+
+    var a = 'am';
+    if (dt.getHours() >= 12) {
       a = 'pm';
     }
 
