@@ -1,6 +1,6 @@
 {
   "name": "mr-datepicker",
-  "version": "0.1.0beta",
+  "version": "0.1.1beta",
   "description": "Simple datepicker",
   "main": "npm_init.js",
   "scripts": {
