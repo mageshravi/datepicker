@@ -79,6 +79,11 @@ var DatePicker = function () {
     this.bindUIActions();
   }
 
+  /**
+   * Parse data attrs specified on the input tag
+   */
+
+
   _createClass(DatePicker, [{
     key: 'parseInputAttrs',
     value: function parseInputAttrs() {
@@ -87,6 +92,17 @@ var DatePicker = function () {
 
       if (!isNaN(minDate)) {
         this.defaults.minDate = minDate;
+      }
+
+      var maxDateStr = this.$input.data('max-date');
+      if (maxDateStr) {
+        var maxDate = parseDateFromString(maxDateStr);
+        this.defaults.maxDate = isNaN(maxDate) ? null : maxDate;
+      }
+
+      if (this.defaults.minDate && this.defaults.maxDate && this.defaults.minDate > this.defaults.maxDate) {
+        console.log(this.$input.get(0));
+        throw Error('min-date is greater than max-date');
       }
 
       var valueStr = this.$input.val();
@@ -116,8 +132,12 @@ var DatePicker = function () {
       function parseDateFromString(dateStr) {
         var today = new Date();
         var tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+        var yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
 
         switch (dateStr) {
+          case 'yesterday':
+            return yesterday;
+
           case 'today':
             return today;
 
@@ -638,6 +658,17 @@ var DatePicker = function () {
         }
       }
 
+      // no months are disabled
+      var disabledMonth = 12;
+      if (this.defaults.maxDate) {
+        if (curDate.getFullYear() > this.defaults.maxDate.getFullYear()) {
+          // all months are disabled
+          disabledMonth = -1;
+        } else if (curDate.getFullYear() === this.defaults.maxDate.getFullYear()) {
+          disabledMonth = this.defaults.maxDate.getMonth();
+        }
+      }
+
       var monthWrapperClass = getClassNameFromSelector(this.cssSelectors.dpMonthWrapper);
       var monthClass = getClassNameFromSelector(this.cssSelectors.dpMonth);
       var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled);
@@ -647,7 +678,7 @@ var DatePicker = function () {
       for (var i = 0; i < 12; i++) {
         var classList = [monthClass];
 
-        if (i < enabledMonth) {
+        if (i < enabledMonth || i > disabledMonth) {
           classList.push(disabledClass);
         } else if (isActiveYear && i === activeMonth) {
           classList.push(activeClass);
@@ -697,6 +728,7 @@ var DatePicker = function () {
 
       var curDate = new Date(selectedYear, selectedMonth, 1);
       var enabledDate = 1;
+      var disabledDate = 32;
       var isActiveYear = curDate.getFullYear() === this.defaults.value.getFullYear();
       var isActiveMonth = curDate.getMonth() === this.defaults.value.getMonth();
       var activeDate = this.defaults.value.getDate();
@@ -714,6 +746,19 @@ var DatePicker = function () {
         }
       }
 
+      if (this.defaults.maxDate) {
+        if (curDate.getFullYear() > this.defaults.maxDate.getFullYear()) {
+          // all dates are disabled
+          disabledDate = 0;
+        } else if (curDate.getFullYear() === this.defaults.maxDate.getFullYear()) {
+          if (curDate.getMonth() > this.defaults.maxDate.getMonth()) {
+            disabledDate = 0;
+          } else if (curDate.getMonth() === this.defaults.maxDate.getMonth()) {
+            disabledDate = this.defaults.maxDate.getDate();
+          }
+        }
+      }
+
       // empty dates
       for (var e = 0; e < curDate.getDay(); e++) {
         html.push('<li class="' + [dpDate, emptyClass].join(' ') + '">&nbsp;</li>');
@@ -724,7 +769,7 @@ var DatePicker = function () {
       for (var d = 1; d <= maxDate; d++) {
         var classList = [dpDate];
 
-        if (d < enabledDate) {
+        if (d < enabledDate || d > disabledDate) {
           classList.push(disabledClass);
         } else if (isActiveYear && isActiveMonth && d === activeDate) {
           classList.push(activeClass);
