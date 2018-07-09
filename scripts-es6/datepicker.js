@@ -565,6 +565,12 @@ var DatePicker = function () {
     key: 'selectDate',
     value: function selectDate(ev) {
       var $li = $(ev.currentTarget);
+      var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled);
+      var emptyClass = getClassNameFromSelector(this.cssSelectors.empty);
+      if ($li.hasClass(disabledClass) || $li.hasClass(emptyClass)) {
+        return;
+      }
+
       var activeClass = getClassNameFromSelector(this.cssSelectors.active);
       $li.siblings('li').removeClass(activeClass);
       $li.addClass(activeClass);
