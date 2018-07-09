@@ -10,7 +10,7 @@ var EVENT_DATE_PICKER_EXIT = 'date-picker:exit'
  * Date-picker
  *
  * @author Magesh Ravi
- * @version 1.0.0
+ * @version 0.1.4beta
  */
 class DatePicker {
 
@@ -201,6 +201,13 @@ class DatePicker {
     }.bind(this))
 
     var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
+
+    this.$year.on('keypress', function (ev) {
+      // when enter key is pressed, prevent any surrounding form from being submitted
+      if (ev.keyCode === 13) {
+        ev.preventDefault()
+      }
+    })
 
     this.$year.on('keyup', function (ev) {
       if (ev.keyCode !== 13) {

@@ -48,7 +48,10 @@
 
         <h3>With value</h3>
         <pre class="prettyprint">&lt;input type="text" class="datepicker" name="date" value="2017-04-14"&gt;</pre>
-        <input type="text" class="js-datepicker" name="date" value="2017-04-14">
+        <form method="POST" action="">
+            <!--Using ENTER key when selecting year field, does NOT submit this form-->
+            <input type="text" class="js-datepicker" name="date" value="2017-04-14">
+        </form>
 
         <!--Min date-->
         <h3>With min-date</h3>
