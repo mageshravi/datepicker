@@ -105,15 +105,6 @@ var DatePicker = function () {
         throw Error('min-date is greater than max-date');
       }
 
-      var valueStr = this.$input.val();
-      var value = parseDateFromString(valueStr);
-
-      if (isNaN(value)) {
-        this.defaults.value = parseDateFromString('today');
-      } else {
-        this.defaults.value = value;
-      }
-
       var formatStr = this.$input.data('format');
       if (!formatStr) {
         formatStr = DatePicker.FORMAT_DATE;
@@ -124,6 +115,17 @@ var DatePicker = function () {
       if (allowedFormats.indexOf(formatStr) !== -1) {
         this.defaults.format = formatStr;
       }
+
+      var valueStr = this.$input.val();
+      var value = parseDateFromString(valueStr);
+
+      if (isNaN(value)) {
+        value = parseDateFromString('today');
+        var formattedValue = this.defaults.format === DatePicker.FORMAT_DATETIME ? getFormattedDateTime(value) : getFormattedDate(value);
+        this.$input.val(formattedValue);
+      }
+
+      this.defaults.value = value;
 
       /**
        * Parses date from the given string
@@ -227,7 +229,7 @@ var DatePicker = function () {
       var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled);
 
       this.$year.on('keypress', function (ev) {
-        // when the enter key is pressed, prevent the surrounding form from being submitted
+        // when enter key is pressed, prevent any surrounding form from being submitted
         if (ev.keyCode === 13) {
           ev.preventDefault();
         }
@@ -377,7 +379,7 @@ var DatePicker = function () {
         return;
       }
 
-      var $targetMonth;
+      var $targetMonth = void 0;
 
       switch (ev.keyCode) {
         case leftKey:
@@ -468,7 +470,7 @@ var DatePicker = function () {
       }
 
       var idx = $dates.index($focusedDate);
-      var $targetDate;
+      var $targetDate = void 0;
 
       switch (ev.keyCode) {
         case leftKey:

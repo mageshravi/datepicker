@@ -64,16 +64,16 @@ class DatePicker {
    * Parse data attrs specified on the input tag
    */
   parseInputAttrs () {
-    var minDateStr = this.$input.data('min-date')
-    var minDate = parseDateFromString(minDateStr)
+    let minDateStr = this.$input.data('min-date')
+    let minDate = parseDateFromString(minDateStr)
 
     if (!isNaN(minDate)) {
       this.defaults.minDate = minDate
     }
 
-    var maxDateStr = this.$input.data('max-date')
+    let maxDateStr = this.$input.data('max-date')
     if (maxDateStr) {
-      var maxDate = parseDateFromString(maxDateStr)
+      let maxDate = parseDateFromString(maxDateStr)
       this.defaults.maxDate = (isNaN(maxDate)) ? null : maxDate
     }
 
@@ -82,21 +82,12 @@ class DatePicker {
       throw Error('min-date is greater than max-date')
     }
 
-    var valueStr = this.$input.val()
-    var value = parseDateFromString(valueStr)
-
-    if (isNaN(value)) {
-      this.defaults.value = parseDateFromString('today')
-    } else {
-      this.defaults.value = value
-    }
-
-    var formatStr = this.$input.data('format')
+    let formatStr = this.$input.data('format')
     if (!formatStr) {
       formatStr = DatePicker.FORMAT_DATE
     }
 
-    var allowedFormats = [
+    let allowedFormats = [
       DatePicker.FORMAT_DATE,
       DatePicker.FORMAT_DATETIME
     ]
@@ -105,14 +96,25 @@ class DatePicker {
       this.defaults.format = formatStr
     }
 
+    let valueStr = this.$input.val()
+    let value = parseDateFromString(valueStr)
+
+    if (isNaN(value)) {
+      value = parseDateFromString('today')
+      let formattedValue = (this.defaults.format === DatePicker.FORMAT_DATETIME) ? getFormattedDateTime(value) : getFormattedDate(value)
+      this.$input.val(formattedValue)
+    }
+
+    this.defaults.value = value
+
     /**
      * Parses date from the given string
      * @param dateStr {String}
      */
     function parseDateFromString (dateStr) {
-      var today = new Date()
-      var tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
-      var yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)
+      let today = new Date()
+      let tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
+      let yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)
 
       switch (dateStr) {
         case 'yesterday':
@@ -131,9 +133,9 @@ class DatePicker {
   }
 
   setup () {
-    var dpClass = getClassNameFromSelector(this.cssSelectors.dp)
-    var dpDisplayClass = getClassNameFromSelector(this.cssSelectors.dpDisplay)
-    var dpDropDown = getClassNameFromSelector(this.cssSelectors.dpDropDown)
+    let dpClass = getClassNameFromSelector(this.cssSelectors.dp)
+    let dpDisplayClass = getClassNameFromSelector(this.cssSelectors.dpDisplay)
+    let dpDropDown = getClassNameFromSelector(this.cssSelectors.dpDropDown)
 
         // draw date-picker
     this.$dp = $('<div class="' + dpClass + '"></div>')
@@ -200,7 +202,7 @@ class DatePicker {
       this.updateMonth()
     }.bind(this))
 
-    var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
+    let disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
 
     this.$year.on('keypress', function (ev) {
       // when enter key is pressed, prevent any surrounding form from being submitted
@@ -296,7 +298,7 @@ class DatePicker {
   }
 
   updateMonth () {
-    var $oldMonthWrapper = this.$dpMonthWrapper
+    let $oldMonthWrapper = this.$dpMonthWrapper
     this.$dpMonthWrapper = $(this.getMonthWrapperHtml())
     $oldMonthWrapper.replaceWith(this.$dpMonthWrapper)
 
@@ -314,21 +316,21 @@ class DatePicker {
    * @param ev {Event}
    */
   navigateMonthsWithKeys (ev) {
-    var leftKey = 37
-    var upKey = 38
-    var rightKey = 39
-    var downKey = 40
-    var enterKey = 13
+    let leftKey = 37
+    let upKey = 38
+    let rightKey = 39
+    let downKey = 40
+    let enterKey = 13
 
-    var focusClass = getClassNameFromSelector(this.cssSelectors.focus)
-    var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
+    let focusClass = getClassNameFromSelector(this.cssSelectors.focus)
+    let disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
 
     if (this.$dpMonthWrapper.hasClass(disabledClass)) {
       return
     }
 
     // check for focused month
-    var $focusedMonth = this.$dp.find(this.cssSelectors.dpMonth + this.cssSelectors.focus)
+    let $focusedMonth = this.$dp.find(this.cssSelectors.dpMonth + this.cssSelectors.focus)
     if (!$focusedMonth.length) {
       // check for active month
       $focusedMonth = this.$dp.find(this.cssSelectors.dpMonth + this.cssSelectors.active)
@@ -344,7 +346,7 @@ class DatePicker {
       return
     }
 
-    var $targetMonth
+    let $targetMonth
 
     switch (ev.keyCode) {
       case leftKey:
@@ -383,8 +385,8 @@ class DatePicker {
 
       case upKey:
       case downKey:
-        var $months = this.$dp.find(this.cssSelectors.dpMonth)
-        var idx = $months.index($focusedMonth)
+        let $months = this.$dp.find(this.cssSelectors.dpMonth)
+        let idx = $months.index($focusedMonth)
 
         if (idx < 6) {
           $targetMonth = $months.eq(idx + 6)
@@ -410,21 +412,21 @@ class DatePicker {
    * @param ev {Event}
    */
   navigateDateWithKeys (ev) {
-    var leftKey = 37
-    var upKey = 38
-    var rightKey = 39
-    var downKey = 40
-    var enterKey = 13
+    let leftKey = 37
+    let upKey = 38
+    let rightKey = 39
+    let downKey = 40
+    let enterKey = 13
 
-    var $dates = this.$dp.find(this.cssSelectors.dpDate).filter(':not(' + this.cssSelectors.empty + ')')
-    var focusClass = getClassNameFromSelector(this.cssSelectors.focus)
-    var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
+    let $dates = this.$dp.find(this.cssSelectors.dpDate).filter(':not(' + this.cssSelectors.empty + ')')
+    let focusClass = getClassNameFromSelector(this.cssSelectors.focus)
+    let disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
 
     if (this.$dpCalWrapper.hasClass(disabledClass)) {
       return
     }
 
-    var $focusedDate = $dates.filter(this.cssSelectors.focus)
+    let $focusedDate = $dates.filter(this.cssSelectors.focus)
     if (!$focusedDate.length) {
       $focusedDate = $dates.filter(':not(' + this.cssSelectors.disabled + ')').first()
       $focusedDate.addClass(focusClass)
@@ -434,8 +436,8 @@ class DatePicker {
       return
     }
 
-    var idx = $dates.index($focusedDate)
-    var $targetDate
+    let idx = $dates.index($focusedDate)
+    let $targetDate
 
     switch (ev.keyCode) {
       case leftKey:
@@ -517,14 +519,14 @@ class DatePicker {
    * @param ev {Event}
    */
   selectMonth (ev) {
-    var $li = $(ev.currentTarget)
-    var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
+    let $li = $(ev.currentTarget)
+    let disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
 
     if ($li.hasClass(disabledClass)) {
       return
     }
 
-    var activeClass = getClassNameFromSelector(this.cssSelectors.active)
+    let activeClass = getClassNameFromSelector(this.cssSelectors.active)
     $li.siblings('li').removeClass(activeClass)
     $li.addClass(activeClass)
 
@@ -536,21 +538,21 @@ class DatePicker {
    * @param ev {Event}
    */
   selectDate (ev) {
-    var $li = $(ev.currentTarget)
-    var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
-    var emptyClass = getClassNameFromSelector(this.cssSelectors.empty)
+    let $li = $(ev.currentTarget)
+    let disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
+    let emptyClass = getClassNameFromSelector(this.cssSelectors.empty)
     if ($li.hasClass(disabledClass) || $li.hasClass(emptyClass)) {
       return
     }
 
-    var activeClass = getClassNameFromSelector(this.cssSelectors.active)
+    let activeClass = getClassNameFromSelector(this.cssSelectors.active)
     $li.siblings('li').removeClass(activeClass)
     $li.addClass(activeClass)
 
     // update this.defaults.value
-    var year = this.$year.val()
-    var month = this.getSelectedMonth()
-    var selectedDate = parseInt($li.text())
+    let year = this.$year.val()
+    let month = this.getSelectedMonth()
+    let selectedDate = parseInt($li.text())
     this.defaults.value = new Date(year, month, selectedDate)
 
     // update display
@@ -571,12 +573,12 @@ class DatePicker {
   }
 
   setTimeAndHide () {
-    var year = this.$year.val()
-    var month = this.getSelectedMonth()
-    var selectedDate = this.getSelectedDate()
-    var hour = parseInt(this.$hour.val())
-    var minute = parseInt(this.$minute.val())
-    var meridian = this.$meridian.val()
+    let year = this.$year.val()
+    let month = this.getSelectedMonth()
+    let selectedDate = this.getSelectedDate()
+    let hour = parseInt(this.$hour.val())
+    let minute = parseInt(this.$minute.val())
+    let meridian = this.$meridian.val()
 
     if (hour === '') {
       this.$hour.focus()
@@ -589,7 +591,7 @@ class DatePicker {
         hour += 12
       }
 
-      var dt = new Date(year, month, selectedDate, hour, minute)
+      let dt = new Date(year, month, selectedDate, hour, minute)
       if (isNaN(dt)) {
         console.log(`Invalid date: year:${year} month:${month} date:${selectedDate} hour:${hour} minute:${minute}`)
         return
@@ -602,11 +604,11 @@ class DatePicker {
   }
 
   getYearWrapperHtml () {
-    var yearWrapperClass = getClassNameFromSelector(this.cssSelectors.dpYearWrapper)
+    let yearWrapperClass = getClassNameFromSelector(this.cssSelectors.dpYearWrapper)
 
-    var prevYearClass = getClassNameFromSelector(this.cssSelectors.jsPrevYear)
-    var yearClass = getClassNameFromSelector(this.cssSelectors.jsYear)
-    var nextYearClass = getClassNameFromSelector(this.cssSelectors.jsNextYear)
+    let prevYearClass = getClassNameFromSelector(this.cssSelectors.jsPrevYear)
+    let yearClass = getClassNameFromSelector(this.cssSelectors.jsYear)
+    let nextYearClass = getClassNameFromSelector(this.cssSelectors.jsNextYear)
 
     return [
       '<div class="' + yearWrapperClass + '">',
@@ -622,17 +624,17 @@ class DatePicker {
       this.$year = this.$dp.find(this.cssSelectors.jsYear)
     }
 
-    var monthLabels = [
+    let monthLabels = [
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ]
 
-    var curDate = new Date(this.$year.val(), 0, 1)
-    var isActiveYear = (curDate.getFullYear() === this.defaults.value.getFullYear())
-    var activeMonth = this.defaults.value.getMonth()
+    let curDate = new Date(this.$year.val(), 0, 1)
+    let isActiveYear = (curDate.getFullYear() === this.defaults.value.getFullYear())
+    let activeMonth = this.defaults.value.getMonth()
 
     // all months are enabled
-    var enabledMonth = 0
+    let enabledMonth = 0
     if (this.defaults.minDate) {
       if (curDate.getFullYear() < this.defaults.minDate.getFullYear()) {
         // all months are disabled
@@ -643,7 +645,7 @@ class DatePicker {
     }
 
     // no months are disabled
-    var disabledMonth = 12
+    let disabledMonth = 12
     if (this.defaults.maxDate) {
       if (curDate.getFullYear() > this.defaults.maxDate.getFullYear()) {
         // all months are disabled
@@ -653,14 +655,14 @@ class DatePicker {
       }
     }
 
-    var monthWrapperClass = getClassNameFromSelector(this.cssSelectors.dpMonthWrapper)
-    var monthClass = getClassNameFromSelector(this.cssSelectors.dpMonth)
-    var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
-    var activeClass = getClassNameFromSelector(this.cssSelectors.active)
-    var html = ['<ul class="' + monthWrapperClass + '" tabindex="0">']
+    let monthWrapperClass = getClassNameFromSelector(this.cssSelectors.dpMonthWrapper)
+    let monthClass = getClassNameFromSelector(this.cssSelectors.dpMonth)
+    let disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
+    let activeClass = getClassNameFromSelector(this.cssSelectors.active)
+    let html = ['<ul class="' + monthWrapperClass + '" tabindex="0">']
 
-    for (var i = 0; i < 12; i++) {
-      var classList = [monthClass]
+    for (let i = 0; i < 12; i++) {
+      let classList = [monthClass]
 
       if (i < enabledMonth || i > disabledMonth) {
         classList.push(disabledClass)
@@ -668,7 +670,7 @@ class DatePicker {
         classList.push(activeClass)
       }
 
-      var li = [
+      let li = [
         '<li',
         'data-month="' + i + '"',
         'class="' + classList.join(' ') + '"'
@@ -685,21 +687,21 @@ class DatePicker {
   }
 
   getCalWrapperHtml () {
-    var dpCalWrapper = getClassNameFromSelector(this.cssSelectors.dpCalWrapper)
-    var dpWeekWrapper = getClassNameFromSelector(this.cssSelectors.dpWeekWrapper)
-    var dpDate = getClassNameFromSelector(this.cssSelectors.dpDate)
-    var disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
-    var activeClass = getClassNameFromSelector(this.cssSelectors.active)
-    var emptyClass = getClassNameFromSelector(this.cssSelectors.empty)
+    let dpCalWrapper = getClassNameFromSelector(this.cssSelectors.dpCalWrapper)
+    let dpWeekWrapper = getClassNameFromSelector(this.cssSelectors.dpWeekWrapper)
+    let dpDate = getClassNameFromSelector(this.cssSelectors.dpDate)
+    let disabledClass = getClassNameFromSelector(this.cssSelectors.disabled)
+    let activeClass = getClassNameFromSelector(this.cssSelectors.active)
+    let emptyClass = getClassNameFromSelector(this.cssSelectors.empty)
 
-    var html = [
+    let html = [
       '<div class="' + dpCalWrapper + '" tabindex="0">'
     ]
 
-    var weekDayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+    let weekDayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
     html.push('<ul class="' + dpWeekWrapper + '">')
 
-    for (var i = 0; i < 7; i++) {
+    for (let i = 0; i < 7; i++) {
       html.push(
                 '<li class="' + [dpDate, emptyClass].join(' ') + '">' + weekDayLabels[i] + '</li>'
             )
@@ -710,19 +712,19 @@ class DatePicker {
     // draw dates
     html.push('<ul class="' + dpWeekWrapper + '">')
 
-    var selectedYear = this.$year.val()
-    var selectedMonth = this.getSelectedMonth()
+    let selectedYear = this.$year.val()
+    let selectedMonth = this.getSelectedMonth()
 
     if (selectedMonth === -1) {
       return
     }
 
-    var curDate = new Date(selectedYear, selectedMonth, 1)
-    var enabledDate = 1
-    var disabledDate = 32
-    var isActiveYear = (curDate.getFullYear() === this.defaults.value.getFullYear())
-    var isActiveMonth = (curDate.getMonth() === this.defaults.value.getMonth())
-    var activeDate = this.defaults.value.getDate()
+    let curDate = new Date(selectedYear, selectedMonth, 1)
+    let enabledDate = 1
+    let disabledDate = 32
+    let isActiveYear = (curDate.getFullYear() === this.defaults.value.getFullYear())
+    let isActiveMonth = (curDate.getMonth() === this.defaults.value.getMonth())
+    let activeDate = this.defaults.value.getDate()
 
     if (this.defaults.minDate) {
       if (curDate.getFullYear() < this.defaults.minDate.getFullYear()) {
@@ -751,14 +753,14 @@ class DatePicker {
     }
 
     // empty dates
-    for (var e = 0; e < curDate.getDay(); e++) {
+    for (let e = 0; e < curDate.getDay(); e++) {
       html.push('<li class="' + [dpDate, emptyClass].join(' ') + '">&nbsp;</li>')
     }
 
-    var maxDate = getDaysInMonth(selectedYear, selectedMonth)
+    let maxDate = getDaysInMonth(selectedYear, selectedMonth)
 
-    for (var d = 1; d <= maxDate; d++) {
-      var classList = [dpDate]
+    for (let d = 1; d <= maxDate; d++) {
+      let classList = [dpDate]
 
       if (d < enabledDate || d > disabledDate) {
         classList.push(disabledClass)
@@ -776,21 +778,21 @@ class DatePicker {
   }
 
   getTimeWrapperHtml () {
-    var timeWrapperClassName = getClassNameFromSelector(this.cssSelectors.dpTimeWrapper)
-    var selectLabelClassName = getClassNameFromSelector(this.cssSelectors.dpSelectMenuLabel)
-    var selectMenuClassName = getClassNameFromSelector(this.cssSelectors.dpSelectMenu)
-    var hourClassName = getClassNameFromSelector(this.cssSelectors.jsHour)
-    var minClassName = getClassNameFromSelector(this.cssSelectors.jsMinute)
-    var meridianClassName = getClassNameFromSelector(this.cssSelectors.jsMeridian)
+    let timeWrapperClassName = getClassNameFromSelector(this.cssSelectors.dpTimeWrapper)
+    let selectLabelClassName = getClassNameFromSelector(this.cssSelectors.dpSelectMenuLabel)
+    let selectMenuClassName = getClassNameFromSelector(this.cssSelectors.dpSelectMenu)
+    let hourClassName = getClassNameFromSelector(this.cssSelectors.jsHour)
+    let minClassName = getClassNameFromSelector(this.cssSelectors.jsMinute)
+    let meridianClassName = getClassNameFromSelector(this.cssSelectors.jsMeridian)
 
-    var selected = ''
-    var hourNow = this.defaults.value.getHours()
-    var minNow = this.defaults.value.getMinutes()
+    let selected = ''
+    let hourNow = this.defaults.value.getHours()
+    let minNow = this.defaults.value.getMinutes()
 
-    var hour = `<label class="${selectLabelClassName}">
+    let hour = `<label class="${selectLabelClassName}">
     <select class="${selectMenuClassName} ${hourClassName}">
         <option value="">hh</option>`
-    for (var i = 0; i <= 12; i++) {
+    for (let i = 0; i <= 12; i++) {
       selected = ''
       if (hourNow === i || hourNow % 12 === i) {
         selected = ' selected '
@@ -800,30 +802,30 @@ class DatePicker {
     }
     hour += `</select></label>`
 
-    var minOptions = [0, 15, 30, 45]
-    var min = `<label class="${selectLabelClassName}">
+    let minOptions = [0, 15, 30, 45]
+    let min = `<label class="${selectLabelClassName}">
     <select class="${selectMenuClassName} ${minClassName}">
       <option value="">mm</option>`
-    for (var j in minOptions) {
+    for (let j in minOptions) {
       selected = ''
-      var k = parseInt(j) + 1
+      let k = parseInt(j) + 1
       if (minNow >= minOptions[j] && minNow < minOptions[k]) {
         selected = ' selected '
       }
-      var opt = ('0' + minOptions[j]).slice(-2)
+      let opt = ('0' + minOptions[j]).slice(-2)
       min += `<option value="${opt}" ${selected}>${opt}</option>`
     }
     min += '</select></label>'
 
-    var amSelected = ''
-    var pmSelected = ''
+    let amSelected = ''
+    let pmSelected = ''
     if (hourNow < 12) {
       amSelected = ' selected '
     } else {
       pmSelected = ' selected '
     }
 
-    var meridian = `<label class="${selectLabelClassName}">
+    let meridian = `<label class="${selectLabelClassName}">
     <select class="${selectMenuClassName} ${meridianClassName}">
       <option value="">----</option>
       <option value="am" ${amSelected}>am</option>
@@ -839,18 +841,18 @@ class DatePicker {
   }
 
   getSelectedMonth () {
-    var $selectedMonth = this.$dp.find(this.cssSelectors.dpMonth + this.cssSelectors.active)
-    var $allMonths = this.$dp.find(this.cssSelectors.dpMonth)
+    let $selectedMonth = this.$dp.find(this.cssSelectors.dpMonth + this.cssSelectors.active)
+    let $allMonths = this.$dp.find(this.cssSelectors.dpMonth)
     return $allMonths.index($selectedMonth)
   }
 
   getSelectedDate () {
-    var $selectedDate = this.$dp.find(this.cssSelectors.dpDate + this.cssSelectors.active)
+    let $selectedDate = this.$dp.find(this.cssSelectors.dpDate + this.cssSelectors.active)
     return parseInt($selectedDate.text())
   }
 
   getOverlayHtml () {
-    var overlayClass = getClassNameFromSelector(this.cssSelectors.dpOverlay)
+    let overlayClass = getClassNameFromSelector(this.cssSelectors.dpOverlay)
     return '<div class="' + overlayClass + '"></div>'
   }
 }
@@ -879,19 +881,19 @@ function getFormattedDate (dt) {
  * @param display {Boolean}
  */
 function getFormattedDateTime (dt, display = false) {
-  var time = [
+  let time = [
     ('0' + dt.getHours()).slice(-2),
     ('0' + dt.getMinutes()).slice(-2),
     ('0' + dt.getSeconds()).slice(-2)
   ].join(':')
 
   if (display) {
-    var hours = dt.getHours()
+    let hours = dt.getHours()
     if (hours > 12) {
       hours = hours % 12
     }
 
-    var a = 'am'
+    let a = 'am'
     if (dt.getHours() >= 12) {
       a = 'pm'
     }
@@ -934,7 +936,7 @@ function getClassNameFromSelector (selector) {
 $.fn.datepicker = function () {
   'use strict'
   $(this).each(function () {
-    var $input = $(this)
-    var datePicker = new DatePicker($input) // eslint-disable-line no-unused-vars
+    let $input = $(this)
+    let datePicker = new DatePicker($input) // eslint-disable-line no-unused-vars
   })
 }
