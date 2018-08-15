@@ -121,10 +121,10 @@ var DatePicker = function () {
 
       if (isNaN(value)) {
         value = parseDateFromString('today');
-        var formattedValue = this.defaults.format === DatePicker.FORMAT_DATETIME ? getFormattedDateTime(value) : getFormattedDate(value);
-        this.$input.val(formattedValue);
       }
 
+      var formattedValue = this.defaults.format === DatePicker.FORMAT_DATETIME ? getFormattedDateTime(value) : getFormattedDate(value);
+      this.$input.val(formattedValue);
       this.defaults.value = value;
 
       /**

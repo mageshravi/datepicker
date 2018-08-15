@@ -101,10 +101,10 @@ class DatePicker {
 
     if (isNaN(value)) {
       value = parseDateFromString('today')
-      let formattedValue = (this.defaults.format === DatePicker.FORMAT_DATETIME) ? getFormattedDateTime(value) : getFormattedDate(value)
-      this.$input.val(formattedValue)
     }
 
+    let formattedValue = (this.defaults.format === DatePicker.FORMAT_DATETIME) ? getFormattedDateTime(value) : getFormattedDate(value)
+    this.$input.val(formattedValue)
     this.defaults.value = value
 
     /**
