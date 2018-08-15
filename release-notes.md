@@ -1,5 +1,22 @@
 # Release notes
 
+## v0.1.5 beta
+
+- Fixes the bug that caused the default values "today" and "tomorrow" to be NOT translated to their respective date/datetime formats.
+
+```html
+<!-- input -->
+<input type="text" class="datepicker" name="today" value="today">
+<!-- datepicker transformation -->
+<input type="hidden" class="datepicker" name="today" value="2018-08-15">
+
+<!-- input with datetime format -->
+<input type="text" class="datepicker" name="tomorrow" data-format="datetime" value="tomorrow">
+<!-- datepicker transformation -->
+<input type="hidden" class="datepicker" name="tomorrow" data-format="datetime" value="2018-08-16 16:10:20">
+
+```
+
 ## v0.1.2 beta
 
 - New value keyword **_yesterday_**
