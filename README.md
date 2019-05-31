@@ -1,4 +1,5 @@
 # datepicker
-A simple datepicker that is also keyboard friendly.
 
-See [index.html](https://cdn.rawgit.com/mageshravi/datepicker/master/public/index.html)
+A simple keyboard friendly datepicker plugin. Requires jQuery.
+
+See [index.html](https://mageshravi.github.io/datepicker/public/index.html) for demo.
